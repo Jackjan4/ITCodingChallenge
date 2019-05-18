@@ -1,5 +1,7 @@
 package de.janroslan.getinitchallenge;
 
+
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.PriorityQueue;
@@ -7,8 +9,13 @@ import java.util.PriorityQueue;
 
 
 /**
- * Implementation des Dijkstra-Algorithmus zum Lösen des kürzesten Pfades zweier Knoten in einem ungerichteten Graphen
- * 
+ * Implementation des Dijkstra-Algorithmus zum Lösen des kürzesten Pfades zweier Knoten in einem ungerichteten Graphen.
+ * Im Algorithmus werden ausgehend vom Startknoten jeweils alle Nachbarn besucht, von denen wieder die Nachbarn besucht werden,... 
+ * Es wird immer der Nachbar mit der kürzesten Distanz zum Startknoten besucht, dies wird mithilfe einer PriorityQueue umgesetzt. 
+ * Für jeden Knoten wird beim Besuchen jeweils die Distanz zum Startknoten, sowie der Vorgängerknoten festgehalten, falls der Knoten
+ * nicht bereits eine kürzere Distanz besitzt. Der erste Nachbarknoten ist der Startknoten selbst (Distanz 0). Alle anderen Knoten
+ * erhälten die Distanz 'Unendlich'.
+ *
  * @author Jan-Philipp Roslan
  */
 public class DijkstraSolver {
@@ -16,28 +23,31 @@ public class DijkstraSolver {
 
 
     private final Node[] graph;
-    
+
     private final int start;
     private final int end;
 
-
+    // PriorityQueue mit unbesuchten Knoten, dabei sortiert die Queue selber die Priorät nach der Distanz
     private final PriorityQueue<Node> queue;
 
-    
+
+
     /**
-     * 
+     *
      * @param start - Index des Startknoten
-     * @param end - Index des Endknoten
-     * @param graph 
+     * @param end   - Index des Endknoten
+     * @param graph
      */
     public DijkstraSolver(int start, int end, Node[] graph) {
         this.graph = graph;
         this.start = start;
         this.end = end;
-        
+
         // Priorität in der Queue = Kleinste Distanz zur Erde hat höchste Priorität
         queue = new PriorityQueue<>((a, b) -> (a.getDistance() > b.getDistance()) ? 1 : -1);
     }
+
+
 
     public DijkstraResult solve() {
 
@@ -46,7 +56,7 @@ public class DijkstraSolver {
 
         // Hinzufügen der Erde in die Queue
         queue.add(graph[start]);
-        
+
         Node endNode = graph[end];
 
         while (!queue.isEmpty()) {
@@ -59,16 +69,16 @@ public class DijkstraSolver {
 
             nearest.getNeighbours().forEach((index, cost) -> {
                 Node neighbour = graph[index];
-                
+
                 if (!queue.contains(neighbour) && neighbour.getDistance() == Double.POSITIVE_INFINITY) {
                     // Nachbar wurde noch nie untersucht (=Distanz unendlich) -> Gefundene Distanz setzen und in Queue hinzufügen
-                    
+
                     neighbour.setDistance(nearest.getDistance() + cost);
                     neighbour.setPredecessor(nearest);
                     queue.add(neighbour);
                 } else if (queue.contains(neighbour) && nearest.getDistance() + cost < neighbour.getDistance()) {
                     // Nachbar befindet sich bereits in der Queue, aber es wurde ein kürzerer Weg gefunden -> Neue, bessere Distanz setzen
-                    
+
                     neighbour.setDistance(nearest.getDistance() + cost);
                     neighbour.setPredecessor(nearest);
                 }
@@ -78,11 +88,13 @@ public class DijkstraSolver {
         return new DijkstraResult(endNode.getDistance(), resolvePredecessors(endNode));
     }
 
-    
+
+
     /**
-     * Hilfmethode, welche alle Vorgänger bis zum Startknoten eines gegebenen Knoten auflöst und ihre Labels zurückgibt.
+     * Hilfsmethode, welche alle Vorgänger bis zum Startknoten eines gegebenen Knoten auflöst und ihre Labels zurückgibt.
+     *
      * @param kn
-     * @return 
+     * @return
      */
     private String[] resolvePredecessors(Node kn) {
         ArrayList<String> listResult = new ArrayList<>();
@@ -97,7 +109,4 @@ public class DijkstraSolver {
         String[] result = new String[listResult.size()];
         return listResult.toArray(result);
     }
-
-
-
 }
